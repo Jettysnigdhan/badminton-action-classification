@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install (CPU torch)
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -e ".[dev]"
+      - name: Lint
+        run: ruff check src tests
+      - name: Type check
+        run: mypy src || true   # advisory until annotations harden
+      - name: Tests
+        run: pytest --cov=badminton --cov-report=xml
+      - name: Smoke train (synthetic)
+        run: |
+          python scripts/make_synthetic_data.py --out data --clips-per-class 20
+          python -m badminton.training.train --config configs/default.yaml

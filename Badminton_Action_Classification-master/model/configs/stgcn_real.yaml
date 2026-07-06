@@ -1,0 +1,50 @@
+seed: 42
+
+data:
+  manifest_path: data/manifest_real.jsonl
+  labels: [backhand_drive, backhand_net_shot, forehand_clear, forehand_drive, forehand_net_shot]
+  sequence_length: 24
+  sampling: uniform
+  min_confidence: 0.3
+  split_by: video
+  val_fraction: 0.15
+  test_fraction: 0.15
+
+features:
+  center_joint: pelvis
+  scale: torso
+  rotate_align: true           # Much better for alignment 
+  use_velocity: true
+  use_bone_angles: true        # ignored in graph layout (angles are not per-joint)
+  emit_validity_flag: true     # -> 5 channels/joint: x, y, validity, vx, vy
+
+augment:
+  enabled: true
+  horizontal_mirror: true
+  temporal_jitter: 0.15
+  joint_noise_std: 0.015
+  joint_dropout_p: 0.08
+
+model:
+  name: stgcn
+  hidden_size: 64              # base channel width (grows to 2x in deeper blocks)
+  num_layers: 4               # informational; STGCN uses a fixed 4-block stack
+  dropout: 0.4
+  bidirectional: false
+
+train:
+  epochs: 200
+  batch_size: 16
+  lr: 0.0005
+  weight_decay: 0.001
+  optimizer: adamw
+  class_weighting: true
+  early_stopping_patience: 25
+  num_folds: 5
+  num_workers: 0
+  device: auto
+  mlflow_experiment: badminton-action-stgcn
+
+eval:
+  calibration: true
+  report_per_class: true

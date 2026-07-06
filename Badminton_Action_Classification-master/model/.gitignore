@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+
+# ML artifacts
+data/
+mlruns/
+*.pt
+*.onnx
+.coverage
+coverage.xml
+
+# MLflow local backend
+mlflow.db

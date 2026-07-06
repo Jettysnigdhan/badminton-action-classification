@@ -1,0 +1,55 @@
+# Single source of truth for a run. Validated by badminton.config.Config.
+seed: 42
+
+data:
+  # Manifest: JSONL where each line = {"video_id","player_id","label","keypoints_path"}
+  # keypoints_path -> .npy array of shape [num_frames, 17, 3] (x, y, confidence)
+  manifest_path: data/manifest.jsonl
+  # Real Kaggle dataset under data/archive: 5 classes, 662 clips.
+  labels: [backhand_drive, backhand_net_shot, forehand_clear, forehand_drive, forehand_net_shot]
+  sequence_length: 24          # paper used 10; we extract 24 frames spanning the whole clip
+  sampling: uniform            # uniform | frame_difference
+  min_confidence: 0.3          # joints below this are masked + interpolated
+  # Player identity is unknown for this dataset, so we split by VIDEO (still
+  # leakage-safe: no clip's frames span splits). Use 'player' once IDs exist.
+  split_by: video              # player | video
+  val_fraction: 0.15
+  test_fraction: 0.15
+
+features:
+  center_joint: pelvis         # root-center on mid-hip
+  scale: torso                 # torso | bbox | none
+  rotate_align: false          # align shoulders horizontal (A/B this)
+  use_velocity: true
+  use_bone_angles: true
+  emit_validity_flag: true     # replace raw confidence with a 0/1 validity channel
+
+augment:
+  enabled: true
+  horizontal_mirror: true      # also swaps left/right joints
+  temporal_jitter: 0.1
+  joint_noise_std: 0.01
+  joint_dropout_p: 0.05
+
+model:
+  name: bilstm_attn            # bilstm_attn | tcn | stgcn
+  hidden_size: 128
+  num_layers: 2
+  dropout: 0.3
+  bidirectional: true
+
+train:
+  epochs: 100
+  batch_size: 32
+  lr: 0.001
+  weight_decay: 0.0001
+  optimizer: adam
+  class_weighting: true        # handle class imbalance
+  early_stopping_patience: 12
+  num_folds: 5                 # stratified, subject-disjoint k-fold
+  device: auto                 # auto | cpu | cuda
+  mlflow_experiment: badminton-action
+
+eval:
+  calibration: true            # temperature scaling on val
+  report_per_class: true

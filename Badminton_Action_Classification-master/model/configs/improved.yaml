@@ -1,0 +1,50 @@
+seed: 42
+
+data:
+  manifest_path: data/manifest.jsonl
+  labels: [backhand_drive, backhand_net_shot, forehand_clear, forehand_drive, forehand_net_shot]
+  sequence_length: 24
+  sampling: uniform
+  min_confidence: 0.3
+  split_by: video
+  val_fraction: 0.15
+  test_fraction: 0.15
+
+features:
+  center_joint: pelvis
+  scale: torso
+  rotate_align: true
+  use_velocity: true
+  use_bone_angles: true
+  emit_validity_flag: true
+
+augment:
+  enabled: true
+  horizontal_mirror: true
+  temporal_jitter: 0.15
+  joint_noise_std: 0.015
+  joint_dropout_p: 0.08
+
+model:
+  name: bilstm_attn
+  hidden_size: 256
+  num_layers: 3
+  dropout: 0.25
+  bidirectional: true
+
+train:
+  epochs: 150
+  batch_size: 16
+  lr: 0.0003
+  weight_decay: 0.0015
+  optimizer: adamw
+  class_weighting: true
+  early_stopping_patience: 25
+  num_folds: 5
+  num_workers: 0
+  device: auto
+  mlflow_experiment: badminton-action-tuned
+
+eval:
+  calibration: true
+  report_per_class: true

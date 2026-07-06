@@ -1,0 +1,58 @@
+# Fine-tune our 5-class model from a pretrained backbone.
+# Workflow:
+#   1. Convert external skeletons:  python scripts/convert_external.py --root extern/X --out data_pretrain --layout coco17
+#   2. Pretrain on them:            python -m badminton.training.train --config configs/pretrain_external.yaml   (manifest -> data_pretrain, labels = external classes)
+#   3. Fine-tune on our data:       python -m badminton.training.train --config configs/finetune.yaml
+# Same as configs/default.yaml, plus train.init_from (and optional freeze_backbone for a linear probe).
+seed: 42
+
+data:
+  manifest_path: data/manifest.jsonl
+  labels: [backhand_drive, backhand_net_shot, forehand_clear, forehand_drive, forehand_net_shot]
+  sequence_length: 24
+  sampling: uniform
+  min_confidence: 0.3
+  split_by: video
+  val_fraction: 0.15
+  test_fraction: 0.15
+
+features:
+  center_joint: pelvis
+  scale: torso
+  rotate_align: false
+  use_velocity: true
+  use_bone_angles: true
+  emit_validity_flag: true
+
+augment:
+  enabled: true
+  horizontal_mirror: true
+  temporal_jitter: 0.1
+  joint_noise_std: 0.01
+  joint_dropout_p: 0.05
+
+model:
+  name: bilstm_attn          # must match the pretrained backbone's architecture
+  hidden_size: 128
+  num_layers: 2
+  dropout: 0.3
+  bidirectional: true
+
+train:
+  epochs: 100
+  batch_size: 32
+  lr: 0.0005                 # lower LR for fine-tuning
+  weight_decay: 0.0001
+  optimizer: adam
+  class_weighting: true
+  early_stopping_patience: 15
+  num_folds: 5
+  num_workers: 0
+  device: auto
+  init_from: pretrained.pt   # path to the pretrained checkpoint (backbone is transferred)
+  freeze_backbone: false     # true = linear probe (train head only); false = full fine-tune
+  mlflow_experiment: badminton-action-finetune
+
+eval:
+  calibration: true
+  report_per_class: true

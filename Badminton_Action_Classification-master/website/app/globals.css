@@ -1,0 +1,307 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ════════════════════════════════════════════════════════════════════════
+   Design tokens
+   A layered surface system (canvas → surface → elevated → overlay) with
+   white-alpha hairlines and an "inner light" top edge for depth, rather than
+   flat fills. Cyan is the brand accent; indigo pairs with it for gradients.
+   ════════════════════════════════════════════════════════════════════════ */
+@layer base {
+  :root {
+    /* Light — editorial, calm, high-contrast */
+    --canvas: 248 249 252; /* #F8F9FC */
+    --surface: 255 255 255; /* cards / panels */
+    --elevated: 255 255 255;
+    --overlay: 255 255 255; /* popovers */
+    --ink: 14 22 38; /* #0E1626 */
+    --muted: 88 99 117; /* secondary */
+    --faint: 130 140 156; /* tertiary */
+    --line: 12 20 38; /* borders, applied at --line-alpha */
+    --line-alpha: 0.08;
+    --accent: 6 168 196; /* #06A8C4 — deeper cyan reads on light */
+    --accent-fg: 255 255 255;
+    --edge: 255 255 255; /* top-edge highlight (none meaningful on light) */
+    --edge-alpha: 0;
+    --shadow-color: 18 27 48;
+    --shadow-strength: 1;
+  }
+
+  .dark {
+    /* Dark — deep blue-charcoal, layered, premium */
+    --canvas: 9 12 19; /* #090C13 base */
+    --surface: 17 22 31; /* #11161F sidebar / header / panels */
+    --elevated: 23 30 42; /* #171E2A cards */
+    --overlay: 32 40 54; /* #202836 hover / popovers */
+    --ink: 233 237 244; /* #E9EDF4 */
+    --muted: 154 164 181; /* #9AA4B5 */
+    --faint: 106 117 136; /* #6A7588 */
+    --line: 255 255 255; /* white-alpha hairlines */
+    --line-alpha: 0.08;
+    --accent: 56 211 232; /* #38D3E8 — refined cyan */
+    --accent-fg: 6 14 20;
+    --edge: 255 255 255; /* inner-light top edge */
+    --edge-alpha: 0.05;
+    --shadow-color: 0 0 0;
+    --shadow-strength: 1;
+  }
+
+  * {
+    border-color: rgb(var(--line) / var(--line-alpha));
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+
+  body {
+    background-color: rgb(var(--canvas));
+    color: rgb(var(--ink));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  /* Ambient depth: a faint cyan/indigo aurora so large dark surfaces are never
+     a flat slab. Fixed + non-interactive + very low alpha. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(60rem 40rem at 12% -8%, rgb(var(--accent) / 0.06), transparent 60%),
+      radial-gradient(48rem 36rem at 100% 0%, rgb(40 53 147 / 0.07), transparent 55%);
+  }
+  .dark body::before {
+    background:
+      radial-gradient(60rem 40rem at 12% -8%, rgb(var(--accent) / 0.08), transparent 60%),
+      radial-gradient(52rem 40rem at 100% -6%, rgb(60 80 200 / 0.10), transparent 55%);
+  }
+
+  ::selection {
+    background-color: rgb(var(--accent) / 0.26);
+    color: rgb(var(--ink));
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Refined scrollbar (webkit) */
+  ::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--line) / 0.18);
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--line) / 0.3);
+  }
+}
+
+@layer components {
+  .container-content {
+    @apply mx-auto w-full max-w-content px-6 md:px-8;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-muted;
+  }
+
+  .hairline {
+    border-color: rgb(var(--line) / var(--line-alpha));
+  }
+
+  /* ── Surfaces ──────────────────────────────────────────────────────────
+     A panel layers a hairline ring + inner top-edge highlight + soft ambient
+     shadow — the core premium surface treatment (not a flat fill). */
+  .panel {
+    position: relative;
+    background-color: rgb(var(--surface));
+    border: 1px solid rgb(var(--line) / var(--line-alpha));
+    box-shadow:
+      inset 0 1px 0 0 rgb(var(--edge) / var(--edge-alpha)),
+      0 1px 2px 0 rgb(var(--shadow-color) / calc(0.06 * var(--shadow-strength))),
+      0 12px 32px -16px rgb(var(--shadow-color) / calc(0.5 * var(--shadow-strength)));
+  }
+  .panel-raised {
+    position: relative;
+    background-color: rgb(var(--elevated));
+    border: 1px solid rgb(var(--line) / var(--line-alpha));
+    box-shadow:
+      inset 0 1px 0 0 rgb(var(--edge) / var(--edge-alpha)),
+      0 2px 4px 0 rgb(var(--shadow-color) / calc(0.08 * var(--shadow-strength))),
+      0 24px 48px -20px rgb(var(--shadow-color) / calc(0.6 * var(--shadow-strength)));
+  }
+
+  /* Frosted-glass (sticky headers, overlays) */
+  .glass {
+    background-color: rgb(var(--surface) / 0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+  }
+  .glass-canvas {
+    background-color: rgb(var(--canvas) / 0.72);
+    backdrop-filter: saturate(180%) blur(16px);
+    -webkit-backdrop-filter: saturate(180%) blur(16px);
+  }
+
+  /* Soft accent halo for primary CTAs / active chips */
+  .accent-ring {
+    box-shadow:
+      0 0 0 1px rgb(var(--accent) / 0.35),
+      0 10px 30px -10px rgb(var(--accent) / 0.45);
+  }
+
+  .text-gradient {
+    background-image: linear-gradient(
+      120deg,
+      rgb(var(--ink)) 0%,
+      rgb(99 102 241) 52%,
+      rgb(var(--accent)) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Subtle dot-grid used in dark sections */
+  .dot-grid {
+    background-image: radial-gradient(
+      rgb(255 255 255 / 0.06) 1px,
+      transparent 1px
+    );
+    background-size: 24px 24px;
+  }
+}
+
+@layer utilities {
+  .tracking-display {
+    letter-spacing: -0.035em;
+  }
+  .mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  }
+  /* Numeric tabular alignment for stats / percentages */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+}
+
+/* ── Premium circular theme reveal (View Transitions API) ───────────────── */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 9999;
+  filter: drop-shadow(0 0 26px rgb(var(--reveal-glow, 0 212 255) / 0.34));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 150ms;
+    filter: none;
+  }
+}
+
+@keyframes intro-text-shine {
+  0% {
+    background-position: 180% 0;
+  }
+  100% {
+    background-position: -80% 0;
+  }
+}
+
+/* ── Animated graph & pipeline flow keyframes ──────────────────────────── */
+
+@keyframes draw-path {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes dot-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.7;
+  }
+}
+
+@keyframes step-ring-pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: 0.08;
+  }
+}
+
+@keyframes slide-dot {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.has-custom-cursor,
+.has-custom-cursor * {
+  cursor: none !important;
+}
+
+/* Keep app content above the ambient aurora layer. */
+body > * {
+  position: relative;
+  z-index: 1;
+}
