@@ -5,6 +5,7 @@ import { Hero } from "@/components/Hero";
 import { TrustBar } from "@/components/TrustBar";
 import { Problem } from "@/components/Problem";
 import { Solution } from "@/components/Solution";
+import { ShotDefinitions } from "@/components/ShotDefinitions";
 import { Footer } from "@/components/Footer";
 import { StickyCta } from "@/components/cta/StickyCta";
 import { ClosingCta } from "@/components/cta/ClosingCta";
@@ -47,6 +48,7 @@ export default function HomePage() {
         <TrustBar />
         <Problem />
         <Solution />
+        <ShotDefinitions />
         <SkeletonAnatomy />
         <DataFlow />
         <ModelArchitecture />

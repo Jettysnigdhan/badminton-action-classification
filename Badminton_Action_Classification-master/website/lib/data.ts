@@ -11,7 +11,7 @@ export const SITE = {
     "A production-grade, skeleton-first system that classifies badminton shots from human pose — no shuttlecock detection. A hardened reimplementation and extension of AlphaPose-based shot recognition.",
   url: "https://skeletoncourt.research",
   authorsShort: "SkeletonCourt Research",
-  repo: "https://github.com/archdex-art/Badminton_Action_Classification",
+  repo: "https://github.com/jettysnigdhan/badminton-action-classification",
 };
 
 export type ShotAction = {

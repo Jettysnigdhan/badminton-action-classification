@@ -17,6 +17,7 @@ export function Demo() {
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [results, setResults] = useState<Prediction[] | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -40,6 +41,7 @@ export function Demo() {
     setFileName(safeName);
     setError(null);
     setResults(null);
+    setPreviewUrl(URL.createObjectURL(file));
 
     try {
       setStatus("uploading");
@@ -116,6 +118,7 @@ export function Demo() {
     setError(null);
     setFileName(null);
     setResults(null);
+    setPreviewUrl(null);
   };
 
   const busy = status === "uploading" || status === "analyzing";
@@ -172,6 +175,26 @@ export function Demo() {
                         <span className="h-1.5 w-1.5 rounded-full bg-success" />
                         Analysis complete · {fileName}
                       </div>
+                      {previewUrl ? (
+                        <div className="mb-5 grid gap-4 rounded-3xl border border-white/10 bg-slate-950/80 p-3 sm:grid-cols-[110px_minmax(0,1fr)]">
+                          <div className="overflow-hidden rounded-3xl bg-black">
+                            <video
+                              src={previewUrl}
+                              className="h-28 w-full object-cover"
+                              muted
+                              autoPlay
+                              loop
+                              playsInline
+                            />
+                          </div>
+                          <div className="space-y-2 text-left">
+                            <div className="text-sm font-medium text-white/70">Player preview</div>
+                            <p className="text-sm leading-6 text-slate-300">
+                              A tiny preview of the uploaded clip is shown here for audience-facing results.
+                            </p>
+                          </div>
+                        </div>
+                      ) : null}
                       <ul className="space-y-3 text-left">
                         {results.map((p, i) => (
                           <li key={p.action}>
@@ -217,6 +240,21 @@ export function Demo() {
                           transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
                         />
                       </div>
+                      {previewUrl ? (
+                        <div className="mt-5 overflow-hidden rounded-3xl border border-white/10 bg-slate-950/80 p-3 text-left w-full max-w-sm">
+                          <div className="text-sm font-medium text-white/70">Uploading preview</div>
+                          <div className="mt-3 overflow-hidden rounded-3xl bg-black">
+                            <video
+                              src={previewUrl}
+                              className="h-28 w-full object-cover"
+                              muted
+                              autoPlay
+                              loop
+                              playsInline
+                            />
+                          </div>
+                        </div>
+                      ) : null}
                       <p className="mt-5 font-mono text-sm text-cyan">
                         {status === "uploading" ? "Uploading clip…" : "Extracting skeletons · classifying…"}
                       </p>
@@ -256,6 +294,42 @@ export function Demo() {
                     </motion.div>
                   )}
                 </AnimatePresence>
+              </div>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-4 text-left shadow-md shadow-slate-950/20">
+                  <div className="mb-3 flex items-center justify-between gap-2 text-sm uppercase tracking-[0.24em] text-cyan/70">
+                    <span>YOLO Detection</span>
+                    <span className="rounded-full border border-cyan/20 bg-cyan/10 px-2 py-1 text-[10px] font-semibold text-cyan">auto</span>
+                  </div>
+                  <div className="h-28 overflow-hidden rounded-3xl bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.18),_transparent_35%),linear-gradient(180deg,_rgba(15,23,42,0.9),_rgba(15,23,42,0.6))] p-3">
+                    <div className="relative h-full rounded-3xl border border-cyan/20">
+                      <div className="absolute inset-x-4 top-4 h-12 rounded-2xl border border-cyan/50 bg-cyan/10" />
+                      <div className="absolute left-4 bottom-4 right-4 h-10 rounded-2xl border border-cyan/40 bg-white/5" />
+                      <span className="absolute left-4 top-4 text-xs uppercase tracking-[0.22em] text-cyan/60">Player box</span>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">
+                    Preview the player detection stage before pose extraction.
+                  </p>
+                </div>
+                <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-4 text-left shadow-md shadow-slate-950/20">
+                  <div className="mb-3 flex items-center justify-between gap-2 text-sm uppercase tracking-[0.24em] text-cyan/70">
+                    <span>AlphaPose</span>
+                    <span className="rounded-full border border-cyan/20 bg-cyan/10 px-2 py-1 text-[10px] font-semibold text-cyan">skeleton</span>
+                  </div>
+                  <div className="h-28 overflow-hidden rounded-3xl bg-[radial-gradient(circle_at_top_left,_rgba(96,165,250,0.14),_transparent_35%),linear-gradient(180deg,_rgba(15,23,42,0.9),_rgba(15,23,42,0.6))] p-3">
+                    <div className="relative h-full rounded-3xl border border-cyan/20">
+                      <div className="absolute left-4 top-4 h-3 w-3 rounded-full bg-cyan/80 shadow-[0_0_12px_rgba(56,189,248,0.4)]" />
+                      <div className="absolute left-8 top-6 h-16 w-0.5 rounded-full bg-cyan/50" />
+                      <div className="absolute left-8 top-14 h-16 w-0.5 rounded-full bg-cyan/50" />
+                      <div className="absolute left-6 top-10 h-0.5 w-10 rounded-full bg-cyan/50" />
+                    </div>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-slate-300">
+                    Shows how pose extraction maps joint structure after detection.
+                  </p>
+                </div>
               </div>
 
               <p className="relative mt-4 text-center font-mono text-[11px] text-white/30">

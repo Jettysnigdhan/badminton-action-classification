@@ -16,6 +16,7 @@ export function VideoUploader() {
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [results, setResults] = useState<Prediction[] | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [drag, setDrag] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -23,18 +24,22 @@ export function VideoUploader() {
     if (!ACCEPTED.includes(file.type)) {
       setError("Unsupported format — use MP4, MOV, or WebM.");
       setStatus("error");
+      setPreviewUrl(null);
       return;
     }
     if (file.size === 0 || file.size > MAX_BYTES) {
       setError("File must be between 1 byte and 50 MB.");
       setStatus("error");
+      setPreviewUrl(null);
       return;
     }
     setError(null);
     setResults(null);
-    setFileName(file.name.replace(/[^\w.\- ]+/g, "_").slice(0, 64));
+    const safeName = file.name.replace(/[^\w.\- ]+/g, "_").slice(0, 64);
+    setFileName(safeName);
+    setPreviewUrl(URL.createObjectURL(file));
     try {
-      setStatus("analyzing");
+      setStatus("uploading");
 
       const formData = new FormData();
       formData.append("file", file);
@@ -48,15 +53,15 @@ export function VideoUploader() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error ?? "Classification failed.");
       }
-      
+      setStatus("analyzing");
       const { predictions } = await res.json();
       setResults(predictions);
-      
       setStatus("done");
       // Refresh the server-rendered "Your videos" / dashboard lists.
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
+      setPreviewUrl(null);
       setStatus("error");
     }
   }, [router]);
@@ -86,6 +91,21 @@ export function VideoUploader() {
               <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-success/10 px-3 py-1 text-xs font-medium text-success ring-1 ring-inset ring-success/20">
                 <span className="h-1.5 w-1.5 rounded-full bg-success" /> {fileName}
               </div>
+              {previewUrl ? (
+                <div className="mb-5 overflow-hidden rounded-3xl border border-line/10 bg-surface p-3">
+                  <div className="text-sm font-medium text-ink/70">Preview</div>
+                  <div className="mt-3 overflow-hidden rounded-3xl bg-black">
+                    <video
+                      src={previewUrl}
+                      className="h-28 w-full object-cover"
+                      muted
+                      autoPlay
+                      loop
+                      playsInline
+                    />
+                  </div>
+                </div>
+              ) : null}
               <ul className="space-y-3.5 text-left">
                 {results.map((p, i) => (
                   <li key={p.action}>
@@ -104,13 +124,28 @@ export function VideoUploader() {
                   </li>
                 ))}
               </ul>
-              <button type="button" onClick={() => { setStatus("idle"); setResults(null); }} className="mt-6 rounded-full border border-line/12 px-4 py-2 text-sm font-medium text-muted transition-colors hover:bg-overlay/60 hover:text-ink">
+              <button type="button" onClick={() => { setStatus("idle"); setResults(null); setFileName(null); setPreviewUrl(null); }} className="mt-6 rounded-full border border-line/12 px-4 py-2 text-sm font-medium text-muted transition-colors hover:bg-overlay/60 hover:text-ink">
                 Analyze another
               </button>
             </motion.div>
           ) : busy ? (
             <motion.div key="busy" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center">
               <span className="h-12 w-12 animate-spin rounded-full border-2 border-accent/30 border-t-accent" />
+              {previewUrl ? (
+                <div className="mt-4 w-full max-w-sm overflow-hidden rounded-3xl border border-line/10 bg-surface p-3">
+                  <div className="text-sm font-medium text-ink/70">Uploading preview</div>
+                  <div className="mt-3 overflow-hidden rounded-3xl bg-black">
+                    <video
+                      src={previewUrl}
+                      className="h-28 w-full object-cover"
+                      muted
+                      autoPlay
+                      loop
+                      playsInline
+                    />
+                  </div>
+                </div>
+              ) : null}
               <p className="mt-4 font-mono text-sm text-accent">
                 {status === "uploading" ? "Uploading…" : "Extracting skeletons · classifying…"}
               </p>
