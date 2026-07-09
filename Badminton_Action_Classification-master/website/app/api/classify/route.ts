@@ -3,6 +3,7 @@ import { ACTIONS } from "@/lib/data";
 import { getCurrentUser } from "@/lib/auth-server";
 import { enqueueClassification, updateClassification, type Prediction } from "@/lib/classifications";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { classifyClipWithFallback } from "@/lib/model-inference";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,27 +22,17 @@ function titleCase(slug: string) {
   return slug.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-// Forward the uploaded clip to the Python model server for a real prediction.
-async function classifyWithModel(clip: File): Promise<Prediction[]> {
-  const base = process.env.MODEL_SERVER_URL?.replace(/\/$/, "");
-  if (!base) {
-    throw new Error("MODEL_SERVER_URL is not configured");
-  }
-  const fd = new FormData();
-  fd.append("clip", clip, clip.name);
-  const res = await fetch(`${base}/v1/predict/video`, {
-    method: "POST",
-    body: fd,
-    signal: AbortSignal.timeout(120_000),
-  });
-  if (!res.ok) throw new Error(`model server responded ${res.status}`);
-  const data = (await res.json()) as { probabilities: Record<string, number> };
-  return Object.entries(data.probabilities)
-    .map(([slug, p]) => ({
-      action: SLUG_TO_NAME.get(slug) ?? titleCase(slug),
-      confidence: Math.round(p * 1000) / 10,
-    }))
-    .sort((a, b) => b.confidence - a.confidence);
+// Try the configured model server first, then fall back to a local Python inference path.
+async function classifyWithModel(clip: File): Promise<{ predictions: Prediction[]; thumbnail?: string | null }> {
+  const result = await classifyClipWithFallback(
+    clip,
+    SLUG_TO_NAME,
+    titleCase,
+    {
+      modelServerUrl: process.env.MODEL_SERVER_URL ?? "http://127.0.0.1:8000",
+    }
+  );
+  return { predictions: result.predictions, thumbnail: result.thumbnail ?? null };
 }
 
 export async function POST(req: Request) {
@@ -101,9 +92,12 @@ export async function POST(req: Request) {
 
   try {
     let predictions: Prediction[];
+    let thumbnail: string | null = null;
     let usedModel = false;
     try {
-      predictions = await classifyWithModel(file);
+      const result = await classifyWithModel(file);
+      predictions = result.predictions;
+      thumbnail = result.thumbnail ?? null;
       usedModel = true;
     } catch (err) {
       console.error("Model server classification failed.", err);
@@ -126,7 +120,8 @@ export async function POST(req: Request) {
       jobId: classificationId,
       status: "complete",
       usedModel,
-      predictions 
+      predictions,
+      thumbnail,
     }, { status: 200 });
 
   } catch (error: any) {

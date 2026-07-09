@@ -2,6 +2,7 @@ import dynamic from "next/dynamic";
 import { IntroSequence } from "@/components/IntroSequence";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
+import { IncrementDemo } from "@/components/IncrementDemo";
 import { TrustBar } from "@/components/TrustBar";
 import { Problem } from "@/components/Problem";
 import { Solution } from "@/components/Solution";
@@ -45,6 +46,7 @@ export default function HomePage() {
       <Navbar />
       <main id="main">
         <Hero />
+        <IncrementDemo />
         <TrustBar />
         <Problem />
         <Solution />

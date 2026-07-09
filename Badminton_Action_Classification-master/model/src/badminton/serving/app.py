@@ -144,10 +144,19 @@ async def predict_video(clip: UploadFile = File(...)) -> PredictResponse:
                     xs_valid = xs_valid * w
                     ys_valid = ys_valid * h
 
-                x0 = int(max(xs_valid.min() - 10, 0))
-                y0 = int(max(ys_valid.min() - 10, 0))
-                x1 = int(min(xs_valid.max() + 10, w - 1))
-                y1 = int(min(ys_valid.max() + 10, h - 1))
+                width = max(1.0, float(xs_valid.max() - xs_valid.min()))
+                height = max(1.0, float(ys_valid.max() - ys_valid.min()))
+                pad_x = max(14, int(width * 0.25))
+                pad_y = max(24, int(height * 0.35))
+
+                x0 = int(max(xs_valid.min() - pad_x, 0))
+                y0 = int(max(ys_valid.min() - pad_y, 0))
+                x1 = int(min(xs_valid.max() + pad_x, w - 1))
+                y1 = int(min(ys_valid.max() + pad_y, h - 1))
+
+                # Bias the crop upward slightly so the upper body, shirt, and face area are visible.
+                y0 = max(0, int(y0 - pad_y * 0.15))
+                y1 = min(h - 1, int(y1 + pad_y * 0.05))
 
                 # choose middle frame for the thumbnail
                 mid = int(len(frames) // 2)

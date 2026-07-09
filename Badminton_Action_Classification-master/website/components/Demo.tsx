@@ -18,6 +18,7 @@ export function Demo() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [results, setResults] = useState<Prediction[] | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -41,6 +42,7 @@ export function Demo() {
     setFileName(safeName);
     setError(null);
     setResults(null);
+    setPreviewImageUrl(null);
     setPreviewUrl(URL.createObjectURL(file));
 
     try {
@@ -77,7 +79,7 @@ export function Demo() {
         throw new Error(data?.error ?? "Classification failed.");
       }
       
-      const { jobId, predictions, status: initialStatus } = await classifyRes.json();
+      const { jobId, predictions, status: initialStatus, thumbnail } = await classifyRes.json();
       
       if (initialStatus === "processing" && jobId) {
         // Polling loop
@@ -89,6 +91,7 @@ export function Demo() {
           const pollData = await pollRes.json();
           if (pollData.status === "complete") {
             setResults(pollData.predictions);
+            setPreviewImageUrl(pollData.thumbnail ?? null);
             isDone = true;
           } else if (pollData.status === "error") {
             throw new Error("Analysis failed during background processing.");
@@ -97,6 +100,7 @@ export function Demo() {
       } else {
         // Synchronous fallback
         setResults(predictions);
+        setPreviewImageUrl(thumbnail ?? null);
       }
       
       setStatus("done");
@@ -119,6 +123,7 @@ export function Demo() {
     setFileName(null);
     setResults(null);
     setPreviewUrl(null);
+    setPreviewImageUrl(null);
   };
 
   const busy = status === "uploading" || status === "analyzing";
@@ -175,7 +180,19 @@ export function Demo() {
                         <span className="h-1.5 w-1.5 rounded-full bg-success" />
                         Analysis complete · {fileName}
                       </div>
-                      {previewUrl ? (
+                      {previewImageUrl ? (
+                        <div className="mb-5 grid gap-4 rounded-3xl border border-white/10 bg-slate-950/80 p-3 sm:grid-cols-[110px_minmax(0,1fr)]">
+                          <div className="overflow-hidden rounded-3xl bg-black">
+                            <img src={previewImageUrl} alt="Detected person preview" className="h-28 w-full object-cover" />
+                          </div>
+                          <div className="space-y-2 text-left">
+                            <div className="text-sm font-medium text-white/70">Detected person</div>
+                            <p className="text-sm leading-6 text-slate-300">
+                              The cropped image around the detected player is shown here for the final result preview.
+                            </p>
+                          </div>
+                        </div>
+                      ) : previewUrl ? (
                         <div className="mb-5 grid gap-4 rounded-3xl border border-white/10 bg-slate-950/80 p-3 sm:grid-cols-[110px_minmax(0,1fr)]">
                           <div className="overflow-hidden rounded-3xl bg-black">
                             <video

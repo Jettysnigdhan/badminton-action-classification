@@ -17,6 +17,7 @@ export function VideoUploader() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [results, setResults] = useState<Prediction[] | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [drag, setDrag] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -54,14 +55,16 @@ export function VideoUploader() {
         throw new Error(data?.error ?? "Classification failed.");
       }
       setStatus("analyzing");
-      const { predictions } = await res.json();
+      const { predictions, thumbnail } = await res.json();
       setResults(predictions);
+      setPreviewImageUrl(thumbnail ?? null);
       setStatus("done");
       // Refresh the server-rendered "Your videos" / dashboard lists.
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
       setPreviewUrl(null);
+      setPreviewImageUrl(null);
       setStatus("error");
     }
   }, [router]);
@@ -91,7 +94,14 @@ export function VideoUploader() {
               <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-success/10 px-3 py-1 text-xs font-medium text-success ring-1 ring-inset ring-success/20">
                 <span className="h-1.5 w-1.5 rounded-full bg-success" /> {fileName}
               </div>
-              {previewUrl ? (
+              {previewImageUrl ? (
+                <div className="mb-5 overflow-hidden rounded-3xl border border-line/10 bg-surface p-3">
+                  <div className="text-sm font-medium text-ink/70">Detected person</div>
+                  <div className="mt-3 overflow-hidden rounded-3xl bg-black">
+                    <img src={previewImageUrl} alt="Detected person preview" className="h-28 w-full object-cover" />
+                  </div>
+                </div>
+              ) : previewUrl ? (
                 <div className="mb-5 overflow-hidden rounded-3xl border border-line/10 bg-surface p-3">
                   <div className="text-sm font-medium text-ink/70">Preview</div>
                   <div className="mt-3 overflow-hidden rounded-3xl bg-black">
@@ -124,7 +134,7 @@ export function VideoUploader() {
                   </li>
                 ))}
               </ul>
-              <button type="button" onClick={() => { setStatus("idle"); setResults(null); setFileName(null); setPreviewUrl(null); }} className="mt-6 rounded-full border border-line/12 px-4 py-2 text-sm font-medium text-muted transition-colors hover:bg-overlay/60 hover:text-ink">
+              <button type="button" onClick={() => { setStatus("idle"); setResults(null); setFileName(null); setPreviewUrl(null); setPreviewImageUrl(null); }} className="mt-6 rounded-full border border-line/12 px-4 py-2 text-sm font-medium text-muted transition-colors hover:bg-overlay/60 hover:text-ink">
                 Analyze another
               </button>
             </motion.div>
