@@ -43,7 +43,7 @@ export default async function VideosPage() {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m8 5 11 7-11 7z"/></svg>
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-mono text-[13px] text-ink">{row.filename}</p>
+                  <p className="truncate font-mono text-[13px] text-ink">{row.original_filename || row.filename}</p>
                   <p className="mt-0.5 text-xs text-muted">
                     <span className="tnum">{new Date(row.created_at).toISOString().slice(0, 10)}</span>
                     {row.predicted ? (

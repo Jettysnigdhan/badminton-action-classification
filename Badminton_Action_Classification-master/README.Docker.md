@@ -1,17 +1,35 @@
-### Building and running your application
+# Docker setup for Badminton Action Classification
 
-When you're ready, start your application by running:
-`docker compose up --build`.
+This repository now includes real Dockerfiles for the ML model server and the Next.js website.
 
-### Deploying your application to the cloud
+## Build and run locally
 
-First, build your image, e.g.: `docker build -t myapp .`.
-If your cloud uses a different CPU architecture than your development
-machine (e.g., you are on a Mac M1 and your cloud provider is amd64),
-you'll want to build the image for that platform, e.g.:
-`docker build --platform=linux/amd64 -t myapp .`.
+From the repository root:
 
-Then, push it to your registry, e.g. `docker push myregistry.com/myapp`.
+```bash
+docker compose up --build
+```
 
-Consult Docker's [getting started](https://docs.docker.com/go/get-started-sharing/)
-docs for more detail on building and pushing.
+Then open:
+
+```bash
+http://localhost:3000
+```
+
+The model API will be available at:
+
+```bash
+http://localhost:8000
+```
+
+## Files created
+
+- `model/Dockerfile` — builds the FastAPI model server
+- `website/Dockerfile` — builds the Next.js website
+- `compose.yaml` — starts both services together
+
+## Notes
+
+- The model artifact is mounted into the model container from `./model/model.pt`
+- The website service is configured with `MODEL_SERVER_URL=http://model:8000`
+- If you need GPU support, use a CUDA-compatible Python base image and set `POSE_DEVICE=cuda`

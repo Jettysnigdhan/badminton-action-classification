@@ -1,0 +1,27 @@
+version: '3.9'
+services:
+  model:
+    build:
+      context: .
+      dockerfile: model/Dockerfile
+    volumes:
+      - ./model/model.pt:/app/model.pt:ro
+    environment:
+      - MODEL_PATH=/app/model.pt
+      - POSE_DEVICE=cpu
+      - POSE_MODE=balanced
+      - MODEL_VERSION=dev
+    ports:
+      - "8000:8000"
+
+  website:
+    build:
+      context: .
+      dockerfile: website/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - MODEL_SERVER_URL=http://model:8000
+    depends_on:
+      - model

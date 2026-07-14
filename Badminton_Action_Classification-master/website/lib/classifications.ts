@@ -15,6 +15,7 @@ export type ClassificationRow = {
 export function recordClassification(opts: {
   userId: string;
   filename: string;
+  originalFilename: string;
   size: number;
   mime: string;
   predictions: Prediction[];
@@ -25,8 +26,8 @@ export function recordClassification(opts: {
   const videoId = newId("vid");
 
   db.prepare(
-    "INSERT INTO videos (id, user_id, filename, size, mime, status, created_at) VALUES (?,?,?,?,?,'complete',?)",
-  ).run(videoId, opts.userId, opts.filename, opts.size, opts.mime, now);
+    "INSERT INTO videos (id, user_id, filename, original_filename, size, mime, status, created_at) VALUES (?,?,?,?,?,?,?,'complete',?)",
+  ).run(videoId, opts.userId, opts.filename, opts.originalFilename, opts.size, opts.mime, now);
 
   const top = opts.predictions[0];
   const id = newId("cls");
@@ -58,6 +59,7 @@ export function recordClassification(opts: {
 export function enqueueClassification(opts: {
   userId: string;
   filename: string;
+  originalFilename: string;
   size: number;
   mime: string;
 }): { videoId: string; classificationId: string } {
@@ -66,8 +68,8 @@ export function enqueueClassification(opts: {
   const videoId = newId("vid");
 
   db.prepare(
-    "INSERT INTO videos (id, user_id, filename, size, mime, status, created_at) VALUES (?,?,?,?,?,'processing',?)"
-  ).run(videoId, opts.userId, opts.filename, opts.size, opts.mime, now);
+    "INSERT INTO videos (id, user_id, filename, original_filename, size, mime, status, created_at) VALUES (?,?,?,?,?,?,?,'processing',?)"
+  ).run(videoId, opts.userId, opts.filename, opts.originalFilename, opts.size, opts.mime, now);
 
   const id = newId("cls");
   db.prepare(
@@ -110,21 +112,24 @@ export function updateClassification(id: string, opts: {
 export function listClassifications(userId: string, limit = 100): ClassificationRow[] {
   return getDb()
     .prepare(
-      "SELECT id, clip, predicted, confidence, status, source, created_at FROM classifications WHERE user_id = ? ORDER BY created_at DESC LIMIT ?",
+      `SELECT c.id, c.clip, c.predicted, c.confidence, c.status, c.source, c.created_at, v.original_filename
+       FROM classifications c LEFT JOIN videos v ON c.video_id = v.id
+       WHERE c.user_id = ? ORDER BY c.created_at DESC LIMIT ?`,
     )
-    .all(userId, limit) as ClassificationRow[];
+    .all(userId, limit) as (ClassificationRow & { original_filename?: string })[];
 }
 
 export function listVideos(userId: string, limit = 100) {
   return getDb()
     .prepare(
-      `SELECT v.id, v.filename, v.created_at, c.predicted, c.status
+      `SELECT v.id, v.filename, v.original_filename, v.created_at, c.predicted, c.status
        FROM videos v LEFT JOIN classifications c ON c.video_id = v.id
        WHERE v.user_id = ? ORDER BY v.created_at DESC LIMIT ?`,
     )
     .all(userId, limit) as {
     id: string;
     filename: string;
+    original_filename: string;
     created_at: number;
     predicted: string | null;
     status: string | null;

@@ -47,7 +47,7 @@ export function StickyCta() {
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="fixed inset-x-0 bottom-4 z-40 flex justify-center px-4"
         >
-          <div className="glass flex items-center gap-3 rounded-full border py-2 pl-5 pr-2 shadow-card-hover sm:gap-5">
+          <div className="flex items-center gap-3 rounded-full border border-line/10 bg-surface/95 py-2 pl-5 pr-2 shadow-card-hover sm:gap-5 dark:border-line/20 dark:bg-elevated/95">
             <p className="hidden text-sm font-medium text-ink sm:block">
               <AnimatePresence mode="wait">
                 <motion.span

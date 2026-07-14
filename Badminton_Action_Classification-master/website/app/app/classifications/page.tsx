@@ -44,7 +44,7 @@ export default async function ClassificationsPage() {
                 {rows.map((row) => (
                   <tr key={row.id} className="transition-colors hover:bg-elevated/50">
                     <td className="px-5 py-3.5 font-mono text-xs text-muted">{row.id}</td>
-                    <td className="px-5 py-3.5 font-mono text-xs text-ink">{row.clip}</td>
+                    <td className="px-5 py-3.5 font-mono text-xs text-ink">{(row as any).original_filename || row.clip}</td>
                     <td className="px-5 py-3.5 font-medium text-ink">{row.predicted}</td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2">

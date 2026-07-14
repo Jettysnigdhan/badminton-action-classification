@@ -1,7 +1,7 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { TryNowButton } from "./cta/TryNowButton";
 
 export function Hero() {
   return (
@@ -21,7 +21,7 @@ export function Hero() {
           className="inline-flex items-center gap-2 rounded-full border bg-surface px-3 py-1.5 text-xs font-medium text-muted shadow-sm"
         >
           <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-success" />
-          Skeleton-based action recognition · No shuttlecock tracking
+          Live webcam recording · skeleton-based action recognition
         </motion.span>
 
         <motion.h1
@@ -49,18 +49,20 @@ export function Hero() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.24, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-9 flex flex-wrap items-center justify-center gap-3"
+          className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
         >
-          <TryNowButton size="lg" />
-          <a
-            href="#paper"
-            className="group inline-flex items-center gap-2 rounded-full border bg-surface px-6 py-3.5 text-sm font-medium text-ink shadow-sm transition-colors hover:bg-elevated"
+          <Link
+            href="/#live-demo"
+            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo to-cyan px-7 py-3 text-sm font-semibold text-white shadow-card transition hover:-translate-y-0.5"
           >
-            Explore Research
-            <svg className="transition-transform group-hover:translate-x-0.5" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
-          </a>
+            Record live now
+          </Link>
+          <Link
+            href="/#demo"
+            className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-7 py-3 text-sm font-semibold text-white transition hover:border-cyan/30 hover:bg-white/10"
+          >
+            Upload recorded clip
+          </Link>
         </motion.div>
 
         <motion.dl

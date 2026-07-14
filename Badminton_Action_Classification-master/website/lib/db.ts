@@ -45,6 +45,7 @@ function migrate(d: DatabaseSync) {
       id          TEXT PRIMARY KEY,
       user_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       filename    TEXT NOT NULL,
+      original_filename TEXT NOT NULL,
       size        INTEGER NOT NULL,
       mime        TEXT NOT NULL,
       status      TEXT NOT NULL DEFAULT 'complete',
@@ -97,6 +98,11 @@ function migrate(d: DatabaseSync) {
   const userCols = (d.prepare("PRAGMA table_info(users)").all() as { name: string }[]).map((c) => c.name);
   if (!userCols.includes("twofa_enabled")) {
     d.exec("ALTER TABLE users ADD COLUMN twofa_enabled INTEGER NOT NULL DEFAULT 0");
+  }
+
+  const videoCols = (d.prepare("PRAGMA table_info(videos)").all() as { name: string }[]).map((c) => c.name);
+  if (!videoCols.includes("original_filename")) {
+    d.exec("ALTER TABLE videos ADD COLUMN original_filename TEXT NOT NULL DEFAULT ''");
   }
 }
 

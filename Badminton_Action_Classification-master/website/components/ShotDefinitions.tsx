@@ -79,16 +79,16 @@ function ShotGraphic({ slug }: { slug: string }) {
 
   return (
     <svg {...common} className="h-24 w-24 text-cyan-500">
-      <path d="M16 26c0 3.3 2.7 6 6 6s6-2.7 6-6-2.7-6-6-6-6 2.7-6 6Z" />
-      <path d="M20 20 14 26 20 32" />
-      <path d="M22 20 28 26 22 32" />
-      <path d="M20 10c1.2 2.1.5 4.7-1.5 6.4C16.5 18.7 14 18.9 12 18" />
-      <path d="M26 10c-1.2 2.1-.5 4.7 1.5 6.4 2 1.7 4.5 1.9 6.5 1.4" />
-      {slug === "forehand_clear" ? <path d="M12 12 34 6" /> : null}
-      {slug === "backhand_clear" ? <path d="M12 6 34 12" /> : null}
-      {slug === "forehand_drive" ? <path d="M12 16 34 16" /> : null}
-      {slug === "backhand_drive" ? <path d="M12 26 34 26" /> : null}
-      {slug === "backhand_net_shot" ? <path d="M12 22 34 10" /> : null}
+      <path d="M15 18c0 2.76 2.24 5 5 5s5-2.24 5-5-2.24-5-5-5-5 2.24-5 5Z" />
+      <path d="M17 15 13 19 17 23" />
+      <path d="M19 15 23 19 19 23" />
+      <path d="M16 5c1.75 0 3.17 1.5 3.17 3.35 0 1.6-1 3-2.4 3.5-1.25.43-2.4.26-3.37-.35-.8-.5-1.5-1.28-1.5-2.2C11.5 7.2 12.9 5 14.6 5h1.4Z" />
+      <path d="M30 7c0 2.8-1.5 4.9-3.3 6.4-1.8 1.5-3.8 2.3-5.4 2.4" />
+      {slug === "forehand_clear" ? <path d="M13 13 33 7" /> : null}
+      {slug === "backhand_clear" ? <path d="M13 7 33 13" /> : null}
+      {slug === "forehand_drive" ? <path d="M13 17 33 17" /> : null}
+      {slug === "backhand_drive" ? <path d="M13 27 33 27" /> : null}
+      {slug === "backhand_net_shot" ? <path d="M13 23 33 11" /> : null}
     </svg>
   );
 }
@@ -103,51 +103,35 @@ export function ShotDefinitions() {
           description="Each card describes a common shot type so viewers can connect the prediction to real tactical meaning on court."
         />
 
-        <div className="mt-14 grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {SHOTS.map((shot, index) => (
-            <Reveal key={shot.title} delay={index * 0.06}>
-              <article className="group h-full overflow-hidden rounded-3xl border border-slate-200 bg-surface p-4 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover dark:border-slate-700 dark:bg-slate-900/70">
-                <div className="mb-5 overflow-hidden rounded-[1.75rem] bg-slate-950/10">
-                  {shot.video ? (
-                    <video
-                      className="h-56 w-full object-cover sm:h-60"
-                      src={shot.video}
-                      muted
-                      loop
-                      playsInline
-                      preload="auto"
-                      poster={shot.image}
-                      onMouseEnter={(event) => {
-                        const video = event.currentTarget as HTMLVideoElement;
-                        video.play().catch(() => undefined);
-                      }}
-                      onMouseLeave={(event) => {
-                        const video = event.currentTarget as HTMLVideoElement;
-                        video.pause();
-                        video.currentTime = 0;
-                      }}
-                    />
-                  ) : shot.image ? (
-                    <div
-                      className="h-56 w-full bg-cover bg-center sm:h-60"
-                      style={{
-                        backgroundImage: `linear-gradient(rgba(15,23,42,0.08), rgba(15,23,42,0.08)), url('${shot.image}')`,
-                      }}
-                    />
-                  ) : (
-                    <div className="h-56 w-full sm:h-60">
-                      <ShotGraphic slug={shot.slug} />
+        <div className="relative mt-14">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-56 rounded-[2.5rem] bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.14),_transparent_45%)] blur-3xl" />
+          <div className="mt-6 flex gap-6 overflow-x-auto pb-6 pl-4 pr-2 sm:pl-0 sm:pr-0 lg:px-0">
+            {SHOTS.map((shot, index) => (
+              <Reveal key={shot.title} delay={index * 0.08} y={28}>
+                <article className="snap-center min-w-[320px] max-w-[360px] flex-shrink-0 overflow-hidden rounded-[2rem] border border-slate-700/60 bg-slate-950/95 shadow-[0_28px_80px_-40px_rgba(15,23,42,0.7)] transition-all duration-500 hover:-translate-y-3 hover:shadow-cyan-500/35">
+                  <div className="h-2 w-full bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500" />
+                  <div className="px-6 py-6 sm:px-7">
+                    <div className="mb-6 flex items-center justify-between gap-3">
+                      <div className="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-cyan-500/10 text-cyan-300 ring-1 ring-cyan-500/20 shadow-sm">
+                        <ShotGraphic slug={shot.slug} />
+                      </div>
+                      <span className="rounded-full border border-cyan-400/25 bg-cyan-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200 ring-1 ring-cyan-500/15">
+                        {shot.subtitle.split(" ").slice(0, 2).join(" ")}
+                      </span>
                     </div>
-                  )}
-                </div>
-                <h3 className="font-display text-lg font-semibold tracking-tight text-ink">
-                  {shot.title}
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-muted">{shot.subtitle}</p>
-                <p className="mt-3 text-sm leading-relaxed text-muted">{shot.description}</p>
-              </article>
-            </Reveal>
-          ))}
+
+                    <h3 className="font-display text-2xl font-semibold tracking-tight text-white">
+                      {shot.title}
+                    </h3>
+                    <p className="mt-4 text-sm leading-6 text-slate-300">{shot.description}</p>
+                  </div>
+                  <div className="border-t border-slate-800/80 bg-slate-950/95 px-6 py-4 text-sm text-slate-400">
+                    <span className="font-medium text-slate-100">Shot focus:</span> court control, speed, and tactical timing.
+                  </div>
+                </article>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </div>
     </section>

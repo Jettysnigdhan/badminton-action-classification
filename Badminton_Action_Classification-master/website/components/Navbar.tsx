@@ -14,7 +14,8 @@ import { BrandMark } from "./BrandMark";
 const NAV = [
   { label: "Research", href: "/#paper" },
   { label: "Technology", href: "/#architecture" },
-  { label: "Demo", href: "/#demo" },
+  { label: "Tournaments", href: "/#tournaments" },
+  { label: "Live Demo", href: "/#live-demo" },
   { label: "Contact", href: "/contact" },
 ];
 

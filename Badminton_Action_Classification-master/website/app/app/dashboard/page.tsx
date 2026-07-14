@@ -47,6 +47,15 @@ export default async function DashboardPage() {
             Upload a clip
           </Link>
         </div>
+        <div className="mt-5 rounded-3xl border border-cyan/15 bg-cyan/5 p-5 text-sm text-cyan-100 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p className="font-semibold text-white">Record live practice with webcam shot classification.</p>
+            <p className="mt-1 text-xs text-cyan-200">Open the live recording demo to classify your badminton actions in real time.</p>
+          </div>
+          <Link href="/#live-demo" className="mt-3 inline-flex w-full items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10 sm:mt-0 sm:w-auto">
+            Launch live demo
+          </Link>
+        </div>
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -82,7 +91,7 @@ export default async function DashboardPage() {
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-ink">{row.predicted}</p>
-                    <p className="truncate font-mono text-xs text-muted">{row.clip}</p>
+                    <p className="truncate font-mono text-xs text-muted">{(row as any).original_filename || row.clip}</p>
                   </div>
                   <span className="hidden font-mono text-sm font-semibold text-ink sm:block">{row.confidence.toFixed(1)}%</span>
                   <StatusBadge status={row.status} />

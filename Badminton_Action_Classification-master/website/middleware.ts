@@ -35,13 +35,16 @@ export function middleware(request: NextRequest) {
   // routes themselves enforce auth, and the auth pages should remain reachable.
   const nonce = btoa(crypto.randomUUID());
 
+  const mediaPipeScriptSrc = "https://cdn.jsdelivr.net";
+  const mediaPipeConnectSrc = "https://cdn.jsdelivr.net https://storage.googleapis.com";
+
   const scriptSrc = isDev
-    ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
-    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`;
+    ? `script-src 'self' 'unsafe-eval' 'unsafe-inline' ${mediaPipeScriptSrc}`
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${mediaPipeScriptSrc}`;
 
   const connectSrc = isDev
-    ? "connect-src 'self' ws: wss:"
-    : "connect-src 'self'";
+    ? `connect-src 'self' ws: wss: ${mediaPipeConnectSrc}`
+    : `connect-src 'self' ${mediaPipeConnectSrc}`;
 
   const hostname = request.nextUrl.hostname;
   const isLocal =

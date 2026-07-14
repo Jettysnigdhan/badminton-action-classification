@@ -180,38 +180,13 @@ export function Demo() {
                         <span className="h-1.5 w-1.5 rounded-full bg-success" />
                         Analysis complete · {fileName}
                       </div>
-                      {previewImageUrl ? (
-                        <div className="mb-5 grid gap-4 rounded-3xl border border-white/10 bg-slate-950/80 p-3 sm:grid-cols-[110px_minmax(0,1fr)]">
-                          <div className="overflow-hidden rounded-3xl bg-black">
-                            <img src={previewImageUrl} alt="Detected person preview" className="h-28 w-full object-cover" />
-                          </div>
-                          <div className="space-y-2 text-left">
-                            <div className="text-sm font-medium text-white/70">Detected person</div>
-                            <p className="text-sm leading-6 text-slate-300">
-                              The cropped image around the detected player is shown here for the final result preview.
-                            </p>
-                          </div>
-                        </div>
-                      ) : previewUrl ? (
-                        <div className="mb-5 grid gap-4 rounded-3xl border border-white/10 bg-slate-950/80 p-3 sm:grid-cols-[110px_minmax(0,1fr)]">
-                          <div className="overflow-hidden rounded-3xl bg-black">
-                            <video
-                              src={previewUrl}
-                              className="h-28 w-full object-cover"
-                              muted
-                              autoPlay
-                              loop
-                              playsInline
-                            />
-                          </div>
-                          <div className="space-y-2 text-left">
-                            <div className="text-sm font-medium text-white/70">Player preview</div>
-                            <p className="text-sm leading-6 text-slate-300">
-                              A tiny preview of the uploaded clip is shown here for audience-facing results.
-                            </p>
-                          </div>
-                        </div>
-                      ) : null}
+                      <div className="mb-5 rounded-3xl border border-white/10 bg-slate-950/80 p-5 text-left">
+                        <p className="text-sm font-medium uppercase tracking-[0.16em] text-cyan/70">Upload complete</p>
+                        <h3 className="mt-3 text-xl font-semibold text-white">Many players use this app and improve fast.</h3>
+                        <p className="mt-3 text-sm leading-6 text-slate-300">
+                          Teams and coaches rely on SkeletonCourt to turn raw clips into clearer shot feedback, sharper movement insight, and faster training adjustments.
+                        </p>
+                      </div>
                       <ul className="space-y-3 text-left">
                         {results.map((p, i) => (
                           <li key={p.action}>
@@ -257,21 +232,6 @@ export function Demo() {
                           transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
                         />
                       </div>
-                      {previewUrl ? (
-                        <div className="mt-5 overflow-hidden rounded-3xl border border-white/10 bg-slate-950/80 p-3 text-left w-full max-w-sm">
-                          <div className="text-sm font-medium text-white/70">Uploading preview</div>
-                          <div className="mt-3 overflow-hidden rounded-3xl bg-black">
-                            <video
-                              src={previewUrl}
-                              className="h-28 w-full object-cover"
-                              muted
-                              autoPlay
-                              loop
-                              playsInline
-                            />
-                          </div>
-                        </div>
-                      ) : null}
                       <p className="mt-5 font-mono text-sm text-cyan">
                         {status === "uploading" ? "Uploading clip…" : "Extracting skeletons · classifying…"}
                       </p>

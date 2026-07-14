@@ -78,12 +78,14 @@ export async function POST(req: Request) {
 
   // Randomize storage name and sanitize
   const safeName = `${crypto.randomUUID()}-${file.name.replace(/[^\w.\- ]+/g, "_").slice(0, 80)}`;
+  const originalName = file.name.replace(/[^\w.\- ]+/g, "_").slice(0, 80);
 
   let classificationId = "guest-" + Date.now();
   if (user) {
     const ids = enqueueClassification({
       userId: user.id,
       filename: safeName,
+      originalFilename: originalName,
       size: file.size,
       mime: file.type
     });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -19,7 +19,37 @@ export function VideoUploader() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const [drag, setDrag] = useState(false);
+  const [busyPhase, setBusyPhase] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const busy = status === "uploading" || status === "analyzing";
+  const busyMessages = status === "uploading"
+    ? [
+        "Playing badminton heals many players",
+        "Every rally tells a story",
+        "Your game is about to improve",
+      ]
+    : [
+        "Analyzing your technique",
+        "Discovering your playing style",
+        "Badminton is more than a sport",
+      ];
+
+  useEffect(() => {
+    if (!busy) {
+      setBusyPhase(0);
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setBusyPhase((previous) => {
+        const next = previous + 1;
+        return next >= busyMessages.length ? busyMessages.length - 1 : next;
+      });
+    }, 2200);
+
+    return () => window.clearInterval(interval);
+  }, [busy, busyMessages.length]);
 
   const handle = useCallback(async (file: File) => {
     if (!ACCEPTED.includes(file.type)) {
@@ -39,6 +69,7 @@ export function VideoUploader() {
     const safeName = file.name.replace(/[^\w.\- ]+/g, "_").slice(0, 64);
     setFileName(safeName);
     setPreviewUrl(URL.createObjectURL(file));
+    setBusyPhase(0);
     try {
       setStatus("uploading");
 
@@ -69,8 +100,6 @@ export function VideoUploader() {
     }
   }, [router]);
 
-  const busy = status === "uploading" || status === "analyzing";
-
   return (
     <div className="panel rounded-3xl p-5 md:p-6">
       <div
@@ -94,28 +123,10 @@ export function VideoUploader() {
               <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-success/10 px-3 py-1 text-xs font-medium text-success ring-1 ring-inset ring-success/20">
                 <span className="h-1.5 w-1.5 rounded-full bg-success" /> {fileName}
               </div>
-              {previewImageUrl ? (
-                <div className="mb-5 overflow-hidden rounded-3xl border border-line/10 bg-surface p-3">
-                  <div className="text-sm font-medium text-ink/70">Detected person</div>
-                  <div className="mt-3 overflow-hidden rounded-3xl bg-black">
-                    <img src={previewImageUrl} alt="Detected person preview" className="h-28 w-full object-cover" />
-                  </div>
-                </div>
-              ) : previewUrl ? (
-                <div className="mb-5 overflow-hidden rounded-3xl border border-line/10 bg-surface p-3">
-                  <div className="text-sm font-medium text-ink/70">Preview</div>
-                  <div className="mt-3 overflow-hidden rounded-3xl bg-black">
-                    <video
-                      src={previewUrl}
-                      className="h-28 w-full object-cover"
-                      muted
-                      autoPlay
-                      loop
-                      playsInline
-                    />
-                  </div>
-                </div>
-              ) : null}
+              <div className="mb-5 overflow-hidden rounded-3xl border border-line/10 bg-surface p-5 text-left">
+                <div className="text-sm font-medium text-ink/70">Clip classified</div>
+                <div className="mt-3 text-sm text-ink">Your upload has been analyzed and results are ready.</div>
+              </div>
               <ul className="space-y-3.5 text-left">
                 {results.map((p, i) => (
                   <li key={p.action}>
@@ -141,25 +152,13 @@ export function VideoUploader() {
           ) : busy ? (
             <motion.div key="busy" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center">
               <span className="h-12 w-12 animate-spin rounded-full border-2 border-accent/30 border-t-accent" />
-              {previewUrl ? (
-                <div className="mt-4 w-full max-w-sm overflow-hidden rounded-3xl border border-line/10 bg-surface p-3">
-                  <div className="text-sm font-medium text-ink/70">Uploading preview</div>
-                  <div className="mt-3 overflow-hidden rounded-3xl bg-black">
-                    <video
-                      src={previewUrl}
-                      className="h-28 w-full object-cover"
-                      muted
-                      autoPlay
-                      loop
-                      playsInline
-                    />
-                  </div>
+              <div className="mt-4 w-full max-w-sm overflow-hidden rounded-3xl border border-line/10 bg-surface p-6 text-left">
+                <div className="text-sm font-medium text-ink/70">Processing your clip</div>
+                <div className="mt-3 text-lg font-semibold text-ink">
+                  {busyMessages[busyPhase]}
                 </div>
-              ) : null}
-              <p className="mt-4 font-mono text-sm text-accent">
-                {status === "uploading" ? "Uploading…" : "Extracting skeletons · classifying…"}
-              </p>
-              <p className="mt-1 text-xs text-muted">{fileName}</p>
+                <div className="mt-4 text-xs text-muted">{fileName}</div>
+              </div>
             </motion.div>
           ) : (
             <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center">
